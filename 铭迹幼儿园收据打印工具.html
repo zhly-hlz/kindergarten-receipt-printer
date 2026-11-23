@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>铭迹幼儿园 · 收据打印</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --line:#e3e6ea; --txt:#2b2f36; --sub:#7a8290;
+    --pri:#d9534f; --pri-dark:#c9433f; --ok:#2e9e5b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--bg); color:var(--txt); font-size:14px;}
+  button{font-family:inherit; cursor:pointer;}
+  /* ===== 布局 ===== */
+  .app{max-width:1200px; margin:0 auto; padding:16px;}
+  header.top{display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--card); border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  header.top h1{font-size:18px; margin-right:auto;}
+  header.top h1 small{color:var(--sub); font-weight:normal; font-size:12px; margin-left:8px;}
+  .btn{border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px 14px; font-size:14px;}
+  .btn:hover{background:#f2f4f7;}
+  .btn.primary{background:var(--pri); border-color:var(--pri); color:#fff; font-weight:bold;}
+  .btn.primary:hover{background:var(--pri-dark);}
+  .btn.small{padding:4px 10px; font-size:12px; border-radius:6px;}
+  main{display:flex; gap:16px; margin-top:16px; align-items:flex-start;}
+  /* 左侧名单 */
+  .panel{background:var(--card); border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  #leftPanel{width:340px; flex-shrink:0; overflow:hidden;}
+  #leftPanel .tools{padding:12px; border-bottom:1px solid var(--line); display:flex; gap:8px;}
+  #leftPanel input[type=search], select{border:1px solid var(--line); border-radius:8px; padding:8px; font-size:14px; width:100%;}
+  #classList{width:auto; flex-shrink:0; max-width:150px;}
+  #stuList{max-height:calc(100vh - 240px); overflow-y:auto;}
+  .stu{display:flex; align-items:center; border-bottom:1px solid #f0f2f4;}
+  .stu:hover{background:#fafbfc;}
+  .stuMain{display:flex; align-items:center; gap:10px; padding:9px 14px; flex:1; min-width:0; cursor:pointer;}
+  .stu .name{font-size:15px;}
+  .stu .cls{color:var(--sub); font-size:12px; margin-left:auto;}
+  .stu .badge{background:#fdecea; color:var(--pri); font-size:11px; border-radius:4px; padding:1px 6px; margin-left:6px;}
+  .stuDel{background:none; border:none; color:#c4c9d0; font-size:14px; padding:6px 12px; cursor:pointer; flex-shrink:0;}
+  .stuDel:hover{color:#d9534f;}
+  /* 右侧 */
+  #rightPanel{flex:1; min-width:0;}
+  .globalBar{padding:12px 16px; display:flex; flex-wrap:wrap; gap:14px; align-items:center; border-bottom:1px solid var(--line);}
+  .globalBar label{display:flex; align-items:center; gap:6px; color:var(--sub);}
+  .globalBar input[type=date]{border:1px solid var(--line); border-radius:6px; padding:5px 8px;}
+  .globalBar input[type=text]{border:1px solid var(--line); border-radius:6px; padding:5px 8px; width:110px;}
+  .globalBar .mchk{display:none;}
+  #selList{padding:10px 16px; display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;}
+  .selCard{border:1px solid var(--line); border-radius:10px; padding:10px 12px;}
+  .selCard .head{display:flex; align-items:center; margin-bottom:8px;}
+  .selCard .head b{font-size:15px;}
+  .selCard .head .cls{color:var(--sub); font-size:12px; margin-left:8px;}
+  .selCard .head .rm{margin-left:auto; color:var(--sub); background:none; border:none; font-size:13px;}
+  .selCard .head .rm:hover{color:var(--pri);}
+  .feeRow{display:flex; align-items:center; gap:8px; padding:3px 0;}
+  .feeRow input[type=number]{width:90px; border:1px solid var(--line); border-radius:6px; padding:4px 8px; text-align:right;}
+  .feeRow .sub{margin-left:auto; color:var(--sub); font-size:12px;}
+  .empty{color:var(--sub); text-align:center; padding:40px 0;}
+  .actionBar{padding:14px 16px; display:flex; gap:10px; align-items:center; border-top:1px solid var(--line);}
+  .actionBar .info{color:var(--sub); font-size:13px; margin-left:auto;}
+  /* 弹窗 */
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50;}
+  .modal.show{display:flex;}
+  .modal .box{background:#fff; border-radius:12px; width:640px; max-width:92vw; max-height:84vh; display:flex; flex-direction:column; overflow:hidden;}
+  .modal .box h3{padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center;}
+  .modal .box h3 .x{margin-left:auto; background:none; border:none; font-size:18px; color:var(--sub);}
+  .modal .body{padding:16px 18px; overflow-y:auto;}
+  .recTable{width:100%; border-collapse:collapse; font-size:13px;}
+  .recTable th,.recTable td{border-bottom:1px solid #f0f2f4; padding:6px 8px; text-align:left;}
+  .recTable th{color:var(--sub); font-weight:normal;}
+  .setRow{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .setRow label{width:90px; color:var(--sub); flex-shrink:0;}
+  .setRow input[type=text],.setRow input[type=number]{border:1px solid var(--line); border-radius:6px; padding:7px 10px; flex:1;}
+  .feeSet{display:flex; gap:8px; margin-bottom:8px; align-items:center;}
+  .feeSet input{border:1px solid var(--line); border-radius:6px; padding:7px 10px;}
+  .feeSet .fname{flex:1;} .feeSet .famt{width:110px; text-align:right;}
+  .tip{color:var(--sub); font-size:12px; margin-top:10px; line-height:1.7;}
+  #toast{position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 22px; border-radius:8px; display:none; z-index:99;}
+  /* ================= 打印区 ================= */
+  #printArea{display:none;}
+  @page{ size:A4 portrait; margin:5mm; }
+  @media print{
+    body{background:#fff;}
+    .app,.modal,#toast{display:none !important;}
+    #printArea{display:block;}
+    .page{page-break-after:always;}
+    .page:last-child{page-break-after:auto;}
+  }
+  /* A4 竖放：内容约 200×287mm，3 张 175×94mm 收据上下排列，等距空隙方便裁剪 */
+  .page{width:200mm; height:287mm; display:flex; flex-direction:column; align-items:center; background:#fff; position:relative;}
+  /* 三等分裁剪虚线（A4 竖放 287mm 的 1/3、2/3 处） */
+  .page .cutline{position:absolute; left:0; right:0; height:0; border-top:1px dashed #b3b3b3; pointer-events:none;}
+  .page .cutline.c1{top:95.6mm;}
+  .page .cutline.c2{top:191.3mm;}
+  .rcpt{
+    width:175mm; height:95.67mm; overflow:hidden;   /* 正好 287mm/3，内容垂直居中 → 虚线到标题上沿 = 经手人下沿到虚线 */
+    padding:0 3mm; display:flex; flex-direction:column; justify-content:center; position:relative;
+    font-family:"SimSun","宋体",serif; color:#000;
+  }
+  /* 长方框：只装 今收到 + 明细，标题/编号/日期/签名都在框外 */
+  .rcpt .innerBox{border:1.4pt solid #000; padding:4mm 6mm 4.5mm; margin-top:2mm;}
+  .rcpt .r1{display:flex; align-items:center;}
+  .rcpt .sp{width:34mm;}
+  .rcpt .title{flex:1; text-align:center; font-size:20pt; font-weight:bold; white-space:nowrap;}
+  .rcpt .noBox{width:34mm; text-align:right; font-size:10pt;}
+  .rcpt .noBox .no{color:#c00; font-weight:bold; font-size:12pt;}
+  /* 日期行：紧贴方框上方，右对齐 */
+  .rcpt .dateline{text-align:right; font-size:10pt; margin:1mm 0 0.5mm;}
+  .rcpt .got{display:flex; align-items:baseline; font-size:12.5pt; margin:1.5mm 0 2mm;}
+  .rcpt .got u{text-decoration:none; border-bottom:0.8pt solid #000; padding:0 6mm; font-weight:bold;}
+  .rcpt .got .dt{margin-left:auto; font-size:11.5pt;}
+  table.fees{width:100%; border-collapse:collapse; font-size:11.5pt;}
+  table.fees td{border-bottom:0.5pt solid #999; padding:1.8mm 1mm;}
+  table.fees td.amt{text-align:right; width:38mm;}
+  table.fees tr.total td{border-bottom:1pt solid #000; border-top:1pt solid #000; font-weight:bold;}
+  .rcpt .signers{margin-top:1.5mm; display:flex; font-size:12pt; padding:0 2mm 1mm;}
+  .rcpt .signers .sig{flex:1; white-space:nowrap;}
+  .rcpt .signers .sv{display:inline-block; min-width:22mm; border-bottom:0.8pt solid #000; text-align:center; font-weight:bold;}
+  /* 预览态（屏显缩放提示） */
+  .printPreview{background:#888; padding:14px; border-radius:0 0 12px 12px; overflow:auto;}
+  .printPreview .page{margin:0 auto 14px; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div id="storeWarn" style="display:none; background:#fff7e0; border:1px solid #f0d060; color:#8a6d00; border-radius:10px; padding:10px 16px; margin-bottom:12px; font-size:13px; line-height:1.7;"></div>
+  <header class="top">
+    <h1>🎒 铭迹幼儿园 · 收据打印 <small>离线工具 · 数据只存在本机</small></h1>
+    <input type="file" id="fileImport" accept=".xlsx" style="display:none">
+    <button class="btn" id="btnImport">📥 导入名单</button>
+    <button class="btn" id="btnAddStu">➕ 添加学生</button>
+    <button class="btn" id="btnRecords">📜 打印记录</button>
+    <button class="btn" id="btnSettings">⚙️ 设置</button>
+  </header>
+
+  <main>
+    <section class="panel" id="leftPanel">
+      <div class="tools">
+        <input type="search" id="kw" placeholder="🔍 输入姓名搜索">
+        <select id="classList"><option value="">全部班级</option></select>
+      </div>
+      <div class="tools" style="border-bottom:1px solid var(--line)">
+        <button class="btn small" id="btnSelFiltered">全选当前列表</button>
+        <button class="btn small" id="btnClearSel">清空已选</button>
+        <span style="margin-left:auto;color:var(--sub);font-size:12px" id="selCount"></span>
+      </div>
+      <div id="stuList"></div>
+    </section>
+
+    <section class="panel" id="rightPanel">
+      <div class="globalBar">
+        <label>收款日期 <input type="date" id="payDate"></label>
+        <label>会计 <input type="text" id="sgKj" class="signer" data-k="kj" placeholder="留空则手写"></label>
+        <label>出纳 <input type="text" id="sgCn" class="signer" data-k="cn" placeholder="留空则手写"></label>
+        <label>经手人 <input type="text" id="sgJs" class="signer" data-k="js" placeholder="留空则手写"></label>
+      </div>
+      <div id="selList"><div class="empty">从左侧名单勾选学生后，这里会出现收据内容<br>金额默认按全园统一标准，可逐个修改</div></div>
+      <div class="actionBar">
+        <button class="btn primary" id="btnPrint">🖨️ 打印收据</button>
+        <span class="info" id="printInfo"></span>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 打印记录 -->
+<div class="modal" id="modalRecords">
+  <div class="box">
+    <h3>📜 打印记录（存根台账）<button class="x" data-close>✕</button></h3>
+    <div class="body">
+      <table class="recTable"><thead><tr><th>编号</th><th>姓名</th><th>金额</th><th>收款日期</th><th>打印时间</th><th></th></tr></thead>
+      <tbody id="recBody"></tbody></table>
+      <div class="tip" id="recEmpty" style="display:none">还没有打印记录</div>
+      <div class="tip">💡 记录按打印时间保存，可随时「补打」。清空记录不会影响收据编号。</div>
+      <div style="margin-top:12px;text-align:right"><button class="btn small" id="btnClearRec">清空全部记录</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 添加学生 -->
+<div class="modal" id="modalAddStu">
+  <div class="box" style="width:460px">
+    <h3>➕ 添加学生<button class="x" data-close>✕</button></h3>
+    <div class="body">
+      <div class="setRow"><label>学生姓名</label><input type="text" id="asName" placeholder="必填"></div>
+      <div class="setRow"><label>年级</label><input type="text" id="asGrade" placeholder="如：小班，可留空"></div>
+      <div class="setRow"><label>班级</label><input type="text" id="asClass" placeholder="如：樱桃班，可留空"></div>
+      <div class="setRow"><label>出生日期</label><input type="date" id="asBirth"></div>
+      <div class="setRow"><label>性别</label><input type="text" id="asSex" placeholder="男/女，可留空"></div>
+      <div class="tip">只有「学生姓名」必填，其余留空即可。添加后自动存入本机名单，可在左侧列表勾选打印。</div>
+      <div style="margin-top:14px;text-align:right"><button class="btn primary" id="btnSaveStu">添加到名单</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="modal" id="modalSettings">
+  <div class="box">
+    <h3>⚙️ 设置<button class="x" data-close>✕</button></h3>
+    <div class="body">
+      <div class="setRow"><label>当前收据编号</label><input type="number" id="setCounter" min="1"><span style="color:var(--sub);font-size:12px">下一张收据将使用此编号</span></div>
+      <div style="margin:14px 0 6px;color:var(--sub)">收费项目（收据上的明细行）</div>
+      <div id="feeSetBox"></div>
+      <button class="btn small" id="btnAddFee">＋ 添加项目</button>
+      <div class="tip">修改后记得点击下方「保存设置」。名单可随时用「导入名单」更新（列顺序需与原表一致）。</div>
+      <div style="margin:14px 0 6px;color:var(--sub)">数据备份（含签名、编号、打印记录，可拷到另一台电脑恢复）</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn" id="btnBackup">💾 导出备份文件</button>
+        <button class="btn" id="btnRestore">📂 从备份恢复</button>
+        <input type="file" id="fileRestore" accept=".json" style="display:none">
+      </div>
+      <div style="margin-top:14px;text-align:right"><button class="btn primary" id="btnSaveSettings">保存设置</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/*XLSX-PARSE-START*/
+/* ===== 极简 XLSX 解析（离线，无需任何外部库） ===== */
+function xlsxZipEntries(bytes){
+  var dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  var eocd = -1;
+  for (var i = bytes.length - 22; i >= Math.max(0, bytes.length - 65558); i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('不是有效的 xlsx 文件');
+  var count = dv.getUint16(eocd + 10, true);
+  var cdOff = dv.getUint32(eocd + 16, true);
+  var p = cdOff, entries = {};
+  for (var k = 0; k < count; k++){
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    var method = dv.getUint16(p + 10, true);
+    var compSize = dv.getUint32(p + 20, true);
+    var nameLen = dv.getUint16(p + 28, true);
+    var extraLen = dv.getUint16(p + 30, true);
+    var cmtLen = dv.getUint16(p + 32, true);
+    var lho = dv.getUint32(p + 42, true);
+    var name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
+    entries[name] = { method: method, compSize: compSize, lho: lho };
+    p += 46 + nameLen + extraLen + cmtLen;
+  }
+  for (var n in entries){
+    var e = entries[n];
+    var ln = dv.getUint16(e.lho + 26, true), le = dv.getUint16(e.lho + 28, true);
+    e.data = bytes.subarray(e.lho + 30 + ln + le, e.lho + 30 + ln + le + e.compSize);
+  }
+  return entries;
+}
+async function xlsxInflate(entry){
+  if (!entry) return '';
+  if (entry.method === 0) return new TextDecoder().decode(entry.data);
+  var ds = new DecompressionStream('deflate-raw');
+  var stream = new Blob([entry.data]).stream().pipeThrough(ds);
+  return await new Response(stream).text();
+}
+function xmlDecode(s){
+  return s.replace(/&(amp|lt|gt|quot|apos|#x?[0-9a-fA-F]+);/g, function(m, g){
+    if (g === 'amp') return '&'; if (g === 'lt') return '<'; if (g === 'gt') return '>';
+    if (g === 'quot') return '"'; if (g === 'apos') return "'";
+    if (g[0] === '#'){
+      var c = g[1] === 'x' || g[1] === 'X' ? parseInt(g.slice(2), 16) : parseInt(g.slice(1), 10);
+      return String.fromCodePoint(c);
+    }
+    return m;
+  });
+}
+function colToIdx(ref){
+  var m = /^([A-Z]+)/.exec(ref || ''); if (!m) return -1;
+  var c = 0; for (var i = 0; i < m[1].length; i++) c = c * 26 + m[1].charCodeAt(i) - 64;
+  return c - 1;
+}
+async function parseXlsx(bytes){
+  var entries = xlsxZipEntries(bytes);
+  var shared = [];
+  if (entries['xl/sharedStrings.xml']){
+    var ss = await xlsxInflate(entries['xl/sharedStrings.xml']);
+    var siRe = /<si(?:\s[^>]*)?>([\s\S]*?)<\/si>/g, si;
+    while ((si = siRe.exec(ss))){
+      var t = '', tRe = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g, tm;
+      while ((tm = tRe.exec(si[1]))) t += xmlDecode(tm[1]);
+      shared.push(t);
+    }
+  }
+  var sheetName = null;
+  for (var n in entries){ if (/^xl\/worksheets\/sheet\d+\.xml$/.test(n)){ if (sheetName === null || n < sheetName) sheetName = n; } }
+  if (!sheetName) throw new Error('xlsx 中找不到工作表');
+  var xml = await xlsxInflate(entries[sheetName]);
+  var rows = [], rowRe = /<row(?:\s[^>]*)?>([\s\S]*?)<\/row>/g, rm;
+  while ((rm = rowRe.exec(xml))){
+    var rIdx = parseInt((/r="(\d+)"/.exec(rm[0]) || [0, rows.length + 1])[1], 10);
+    var row = [], cm, cRe = /<c(\s[^>]*)?\/>|<c(\s[^>]*)?>([\s\S]*?)<\/c>/g;
+    while ((cm = cRe.exec(rm[1]))){
+      var attrs = cm[1] || cm[2] || '', inner = cm[3] || '';
+      var ref = (/r="([A-Z]+\d+)"/.exec(attrs) || [])[1];
+      var col = colToIdx(ref);
+      var t = (/t="([^"]+)"/.exec(attrs) || [])[1] || '';
+      var val = null;
+      if (t === 'inlineStr'){
+        var tm2 = /<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/.exec(inner);
+        val = tm2 ? xmlDecode(tm2[1]) : '';
+      } else {
+        var vm = /<v(?:\s[^>]*)?>([\s\S]*?)<\/v>/.exec(inner);
+        if (vm){
+          var raw = xmlDecode(vm[1]);
+          if (t === 's') val = shared[parseInt(raw, 10)];
+          else if (t === 'str' || t === 'e') val = raw;
+          else { var num = parseFloat(raw); val = isNaN(num) ? raw : num; }
+        }
+      }
+      if (col >= 0) row[col] = val;
+    }
+    rows[rIdx - 1] = row;
+  }
+  for (var i = 0; i < rows.length; i++) if (!rows[i]) rows[i] = [];
+  return rows;
+}
+/*XLSX-PARSE-END*/
+
+/* ================= 金额大写 ================= */
+function amountUpper(n){
+  n = Math.round(Number(n) * 100) / 100;
+  if (!isFinite(n) || n < 0) return '';
+  var D = '零壹贰叁肆伍陆柒捌玖', U = ['', '拾', '佰', '仟'], B = ['', '万', '亿', '兆'];
+  function intPart(x){
+    if (x === 0) return '零';
+    var s = '' + x, groups = [];
+    for (var i = s.length; i > 0; i -= 4) groups.unshift(s.slice(Math.max(0, i - 4), i));
+    var res = '', needZero = false;
+    for (var gi = 0; gi < groups.length; gi++){
+      var g = groups[gi], big = B[groups.length - 1 - gi];
+      var part = '', gz = false;
+      for (var d = 0; d < g.length; d++){
+        var dig = +g[d], u = U[g.length - 1 - d];
+        if (dig === 0){ gz = true; }
+        else { part += ((gz && part) ? '零' : '') + D[dig] + u; gz = false; }
+      }
+      if (part){
+        if (res && g[0] === '0') res += '零';
+        res += part + big; needZero = false;
+      } else needZero = true;
+    }
+    return res;
+  }
+  var S = Math.floor(n), f = Math.round((n - S) * 100);
+  var jiao = Math.floor(f / 10), fen = f % 10, out = '';
+  if (S > 0) out += intPart(S) + '元';
+  if (f === 0){ out = (S > 0 ? out : '零元') + '整'; }
+  else {
+    if (jiao > 0) out += D[jiao] + '角';
+    else if (S > 0) out += '零';
+    if (fen > 0) out += D[fen] + '分';
+  }
+  return out || '零元整';
+}
+function fmtMoney(n){ return Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function padNo(n){ return ('0000000' + n).slice(-7); }
+function fmtCnDate(iso){
+  var p = iso.split('-'); if (p.length !== 3) return iso;
+  return p[0] + '年' + parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* ================= 数据 ================= */
+const LS = {
+  students: 'mj_students_v1', settings: 'mj_settings_v1',
+  counter: 'mj_counter_v1', records: 'mj_records_v1',
+  signers: 'mj_signers_v1', printed: 'mj_printed_v1'
+};
+const BUILTIN_STUDENTS = [];
+const ORG = '铭迹幼儿园';   // 园所名称写死
+const DEFAULT_SETTINGS = {
+  items: [
+    { name: '保教费', amt: 2200, on: true },
+    { name: '膳食点心费', amt: 1250, on: true },
+    { name: '生活用品费', amt: 150, on: true }
+  ]
+};
+const ALL_METHODS = null; // （原收款方式已移除，改用 会计/出纳/经手人 签名栏）
+
+let storageOK = true;
+function load(k, d){ try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch(e){ return d; } }
+function save(k, v){
+  try { localStorage.setItem(k, JSON.stringify(v)); }
+  catch(e){ storageOK = false; showStoreWarn(); }
+}
+function storageTest(){
+  try { localStorage.setItem('mj_test', '1'); localStorage.removeItem('mj_test'); return true; }
+  catch(e){ return false; }
+}
+function showStoreWarn(){
+  var b = document.getElementById('storeWarn');
+  if (!b || b.style.display === 'block') return;
+  b.innerHTML = '⚠️ <b>当前窗口不会保存数据！</b>这是预览窗口的限制。请把这个 HTML 文件放到电脑上，<b>双击用浏览器（Edge/Chrome）打开</b>使用，输入的内容就会一直记住。';
+  b.style.display = 'block';
+}
+
+let students = load(LS.students, null) || BUILTIN_STUDENTS.slice();
+let settings = Object.assign({}, DEFAULT_SETTINGS, load(LS.settings, {}));
+let signers = load(LS.signers, { kj: '', cn: '', js: '' });
+let records = load(LS.records, []);
+let printed = load(LS.printed, {});
+let counter = load(LS.counter, null) || 1;
+let sel = {};          // name -> {items:[{name,amt,on}]}
+let batchDate = new Date().toISOString().slice(0, 10);
+
+/* ================= 左侧名单 ================= */
+function classKey(s){ return (s.g || '') + (s.c ? '·' + s.c : ''); }
+function fillClassSelect(){
+  var set = [];
+  students.forEach(function(s){ var k = classKey(s); if (k && set.indexOf(k) < 0) set.push(k); });
+  var el = document.getElementById('classList');
+  el.innerHTML = '<option value="">全部班级</option>' + set.map(function(k){ return '<option>' + esc(k) + '</option>'; }).join('');
+}
+function filteredStudents(){
+  var kw = document.getElementById('kw').value.trim();
+  var cls = document.getElementById('classList').value;
+  return students.filter(function(s){
+    if (cls && classKey(s) !== cls) return false;
+    if (kw && s.n.indexOf(kw) < 0) return false;
+    return true;
+  });
+}
+function renderList(){
+  var box = document.getElementById('stuList');
+  var list = filteredStudents();
+  box.innerHTML = list.map(function(s){
+    var ck = sel[s.n] ? ' checked' : '';
+    var bd = printed[s.n] ? '<span class="badge">' + esc(printed[s.n].no) + '</span>' : '';
+    return '<div class="stu"><label class="stuMain"><input type="checkbox" data-name="' + esc(s.n) + '"' + ck + '>' +
+      '<span class="name">' + esc(s.n) + '</span>' + bd +
+      '<span class="cls">' + esc(classKey(s)) + '</span></label>' +
+      '<button class="stuDel" data-del="' + esc(s.n) + '" title="删除该学生">✕</button></div>';
+  }).join('') || (students.length ? '<div class="empty">没有匹配的学生</div>' : '<div class="empty">还没有学生名单<br>请点上方「📥 导入名单」选择 Excel 表格</div>');
+}
+function renderSel(){
+  var box = document.getElementById('selList');
+  var names = Object.keys(sel);
+  document.getElementById('selCount').textContent = students.length + ' 名学生 · 已选 ' + names.length + ' 人';
+  document.getElementById('btnPrint').textContent = '🖨️ 打印收据（' + names.length + ' 张）';
+  if (!names.length){
+    box.innerHTML = '<div class="empty">从左侧名单勾选学生后，这里会出现收据内容<br>金额默认按全园统一标准，可逐个修改</div>';
+    updateInfo(); return;
+  }
+  box.innerHTML = names.map(function(n){
+    var s = students.filter(function(x){ return x.n === n; })[0] || { n: n, g: '', c: '' };
+    var total = 0;
+    var rows = sel[n].items.map(function(it, i){
+      var on = it.on ? ' checked' : '';
+      if (it.on) total += Number(it.amt) || 0;
+      return '<div class="feeRow"><input type="checkbox" data-n="' + esc(n) + '" data-i="' + i + '" class="fOn"' + on + '>' +
+        '<span style="width:90px">' + esc(it.name) + '</span>¥' +
+        '<input type="number" data-n="' + esc(n) + '" data-i="' + i + '" class="fAmt" value="' + it.amt + '" min="0" step="0.01">' +
+        '</div>';
+    }).join('');
+    return '<div class="selCard"><div class="head"><b>' + esc(n) + '</b><span class="cls">' + esc(classKey(s)) + '</span>' +
+      '<button class="rm" data-rm="' + esc(n) + '">移除 ✕</button></div>' + rows +
+      '<div class="feeRow"><span class="sub">合计：<b style="color:var(--pri)">¥' + fmtMoney(total) + '</b></span></div></div>';
+  }).join('');
+  updateInfo();
+}
+function updateInfo(){
+  var names = Object.keys(sel);
+  if (!names.length){ document.getElementById('printInfo').innerHTML = '下一张收据编号：<b>' + padNo(counter) + '</b>'; return; }
+  var total = 0;
+  names.forEach(function(n){ sel[n].items.forEach(function(it){ if (it.on) total += Number(it.amt) || 0; }); });
+  document.getElementById('printInfo').innerHTML = '共 <b>' + names.length + '</b> 张 · 合计 <b>¥' + fmtMoney(total) + '</b> · 起始编号 <b>' + padNo(counter) + '</b>';
+}
+
+/* ================= 收据渲染 ================= */
+function signerHtml(label, val){
+  return '<span class="sig">' + esc(label) + '：<span class="sv">' + (val ? esc(val) : '\u00A0') + '</span></span>';
+}
+function buildReceipt(r){   // r: {no, name, cls, date, items, total, upper}
+  var items = r.items.map(function(it){
+    return '<tr><td>' + esc(it.name) + '</td><td class="amt">￥' + fmtMoney(it.amt) + '</td></tr>';
+  }).join('');
+  return '<div class="rcpt">' +
+    '<div class="r1"><div class="sp"></div><div class="title">' + esc(ORG) + '收据</div>' +
+    '<div class="noBox">No.<span class="no">' + padNo(r.no) + '</span></div></div>' +
+    '<div class="dateline">' + esc(r.date) + '</div>' +
+    '<div class="innerBox">' +
+    '<div class="got"><span>今收到：<u>' + esc(r.name) + '</u> 小朋友</span></div>' +
+    '<table class="fees">' + items +
+    '<tr class="total"><td colspan="2">合计人民币（大写）：' + esc(r.upper) + '　（小写：￥' + fmtMoney(r.total) + '）</td></tr>' +
+    '</table>' +
+    '</div>' +
+    '<div class="signers">' + signerHtml('会计', signers.kj) + signerHtml('出纳', signers.cn) + signerHtml('经手人', signers.js) + '</div>' +
+    '</div>';
+}
+function makeReceipts(){
+  var names = Object.keys(sel);
+  var list = [];
+  names.forEach(function(n){
+    var s = students.filter(function(x){ return x.n === n; })[0] || { g: '', c: '' };
+    var items = sel[n].items.filter(function(it){ return it.on; }).map(function(it){ return { name: it.name, amt: Number(it.amt) || 0 }; });
+    if (!items.length) return;
+    var total = items.reduce(function(a, b){ return a + b.amt; }, 0);
+    list.push({
+      no: counter + list.length, name: n, cls: classKey(s),
+      date: fmtCnDate(batchDate), items: items, total: total, upper: amountUpper(total)
+    });
+  });
+  return list;
+}
+function renderPages(list, target){
+  var html = '';
+  for (var i = 0; i < list.length; i += 3){
+    html += '<div class="page"><div class="cutline c1"></div><div class="cutline c2"></div>' + list.slice(i, i + 3).map(buildReceipt).join('') + '</div>';
+  }
+  document.getElementById(target).innerHTML = html || '没有可打印的收据（请确认收费项目已勾选）';
+}
+
+/* ================= 打印 ================= */
+document.getElementById('btnPrint').onclick = function(){
+  var list = makeReceipts();
+  if (!list.length){ toast('请先勾选学生并至少保留一个收费项目'); return; }
+  renderPages(list, 'printArea');
+  // 记账
+  list.forEach(function(r){
+    records.unshift({ no: r.no, name: r.name, total: r.total, upper: r.upper, items: r.items, date: r.date, time: new Date().toLocaleString('zh-CN', { hour12: false }) });
+    printed[r.name] = { no: padNo(r.no), date: r.date, total: r.total };
+  });
+  records.sort(function(a, b){ return b.no - a.no; });
+  counter += list.length;
+  save(LS.records, records); save(LS.printed, printed); save(LS.counter, counter);
+  renderList(); renderSel();
+  toast('✅ 已生成 ' + list.length + ' 张存根（编号 ' + padNo(list[0].no) + ' ~ ' + padNo(list[list.length - 1].no) + '），在打印窗口选择打印机即可');
+  setTimeout(function(){ window.print(); }, 300);
+};
+window.onafterprint = function(){ renderList(); renderSel(); };
+
+/* ================= 左侧交互 ================= */
+document.getElementById('kw').oninput = renderList;
+document.getElementById('classList').onchange = renderList;
+document.getElementById('stuList').addEventListener('change', function(e){
+  var cb = e.target;
+  if (cb.tagName !== 'INPUT') return;
+  var n = cb.getAttribute('data-name');
+  if (cb.checked){
+    if (!sel[n]) sel[n] = { items: settings.items.map(function(it){ return { name: it.name, amt: it.amt, on: !!it.on }; }) };
+  } else delete sel[n];
+  renderSel();
+  var list = filteredStudents().filter(function(s){ return s.n === n; });
+  if (list.length){ } // 保持滚动位置
+});
+/* ================= 手动添加 / 删除学生 ================= */
+function refreshAfterRosterChange(){
+  save(LS.students, students);
+  fillClassSelect(); renderList(); renderSel();
+}
+document.getElementById('btnAddStu').onclick = function(){
+  document.getElementById('asName').value = '';
+  document.getElementById('asGrade').value = '';
+  document.getElementById('asClass').value = '';
+  document.getElementById('asBirth').value = '';
+  document.getElementById('asSex').value = '';
+  document.getElementById('modalAddStu').classList.add('show');
+  setTimeout(function(){ document.getElementById('asName').focus(); }, 50);
+};
+document.getElementById('btnSaveStu').onclick = function(){
+  var name = document.getElementById('asName').value.trim();
+  if (!name){ alert('请填写学生姓名'); return; }
+  if (students.some(function(x){ return x.n === name; })){ alert('名单里已有「' + name + '」，请勿重复添加'); return; }
+  students.push({
+    n: name,
+    b: document.getElementById('asBirth').value || '',
+    g: document.getElementById('asGrade').value.trim(),
+    c: document.getElementById('asClass').value.trim(),
+    s: document.getElementById('asSex').value.trim()
+  });
+  refreshAfterRosterChange();
+  document.getElementById('modalAddStu').classList.remove('show');
+  toast('✅ 已添加 ' + name);
+};
+document.getElementById('stuList').addEventListener('click', function(e){
+  var del = e.target.getAttribute && e.target.getAttribute('data-del');
+  if (del == null) return;
+  if (!confirm('确定从名单删除「' + del + '」吗？\n（打印记录不会删除）')) return;
+  students = students.filter(function(x){ return x.n !== del; });
+  delete sel[del]; delete printed[del];
+  save(LS.printed, printed);
+  refreshAfterRosterChange();
+  toast('✅ 已删除 ' + del);
+});
+document.getElementById('btnSelFiltered').onclick = function(){
+  filteredStudents().forEach(function(s){ if (!sel[s.n]) sel[s.n] = { items: settings.items.map(function(it){ return { name: it.name, amt: it.amt, on: !!it.on }; }) }; });
+  renderList(); renderSel();
+};
+document.getElementById('btnClearSel').onclick = function(){ sel = {}; renderList(); renderSel(); };
+document.getElementById('selList').addEventListener('click', function(e){
+  var rm = e.target.getAttribute && e.target.getAttribute('data-rm');
+  if (rm != null){ delete sel[rm]; renderList(); renderSel(); }
+});
+document.getElementById('selList').addEventListener('change', function(e){
+  var t = e.target;
+  if (t.classList.contains('fOn')){ sel[t.dataset.n].items[t.dataset.i].on = t.checked; renderSel(); }
+});
+document.getElementById('selList').addEventListener('input', function(e){
+  var t = e.target;
+  if (t.classList.contains('fAmt')){ sel[t.dataset.n].items[t.dataset.i].amt = t.value; updateInfo(); }
+});
+document.getElementById('payDate').onchange = function(){ batchDate = this.value || batchDate; };
+
+/* ================= 会计/出纳/经手人 ================= */
+function initSigners(){
+  document.getElementById('sgKj').value = signers.kj || '';
+  document.getElementById('sgCn').value = signers.cn || '';
+  document.getElementById('sgJs').value = signers.js || '';
+}
+document.getElementById('sgKj').addEventListener('input', function(){ signers.kj = this.value.trim(); save(LS.signers, signers); });
+document.getElementById('sgCn').addEventListener('input', function(){ signers.cn = this.value.trim(); save(LS.signers, signers); });
+document.getElementById('sgJs').addEventListener('input', function(){ signers.js = this.value.trim(); save(LS.signers, signers); });
+
+/* ================= 弹窗通用 ================= */
+document.querySelectorAll('.modal').forEach(function(m){
+  m.addEventListener('click', function(e){
+    if (e.target === m || e.target.hasAttribute('data-close')) m.classList.remove('show');
+  });
+});
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.style.display = 'none'; }, 3200);
+}
+
+/* ================= 打印记录 ================= */
+document.getElementById('btnRecords').onclick = function(){
+  var b = document.getElementById('recBody');
+  b.innerHTML = records.map(function(r){
+    return '<tr><td style="color:var(--pri);font-weight:bold">' + padNo(r.no) + '</td><td>' + esc(r.name) + '</td><td>¥' + fmtMoney(r.total) + '</td><td>' + esc(r.date) + '</td><td>' + esc(r.time) + '</td>' +
+      '<td><button class="btn small" data-reprint="' + r.no + '">补打</button></td></tr>';
+  }).join('');
+  document.getElementById('recEmpty').style.display = records.length ? 'none' : 'block';
+  document.getElementById('modalRecords').classList.add('show');
+};
+document.getElementById('recBody').addEventListener('click', function(e){
+  var no = e.target.getAttribute && e.target.getAttribute('data-reprint');
+  if (no == null) return;
+  var r = records.filter(function(x){ return x.no == no; })[0];
+  if (!r) return;
+  renderPages([r], 'printArea');
+  document.getElementById('modalRecords').classList.remove('show');
+  setTimeout(function(){ window.print(); }, 300);
+});
+document.getElementById('btnClearRec').onclick = function(){
+  if (!records.length) return;
+  if (!confirm('确定清空全部 ' + records.length + ' 条打印记录？收据编号不受影响。')) return;
+  records = []; save(LS.records, records);
+  document.getElementById('recBody').innerHTML = '';
+  document.getElementById('recEmpty').style.display = 'block';
+};
+
+/* ================= 设置 ================= */
+function renderFeeSet(){
+  var box = document.getElementById('feeSetBox');
+  box.innerHTML = settings.items.map(function(it, i){
+    return '<div class="feeSet"><input type="checkbox" data-fi="' + i + '" class="fsetOn"' + (it.on ? ' checked' : '') + '>' +
+      '<input type="text" class="fname" data-fi="' + i + '" value="' + esc(it.name) + '" placeholder="项目名称">¥' +
+      '<input type="number" class="famt" data-fi="' + i + '" value="' + it.amt + '" min="0" step="0.01">' +
+      '<button class="btn small" data-fdel="' + i + '">删除</button></div>';
+  }).join('');
+}
+document.getElementById('btnSettings').onclick = function(){
+  document.getElementById('setCounter').value = counter;
+  renderFeeSet();
+  document.getElementById('modalSettings').classList.add('show');
+};
+document.getElementById('btnAddFee').onclick = function(){ settings.items.push({ name: '', amt: 0, on: true }); renderFeeSet(); };
+document.getElementById('feeSetBox').addEventListener('click', function(e){
+  var d = e.target.getAttribute && e.target.getAttribute('data-fdel');
+  if (d != null){ settings.items.splice(+d, 1); renderFeeSet(); }
+});
+document.getElementById('feeSetBox').addEventListener('input', function(e){
+  var i = e.target.getAttribute && e.target.getAttribute('data-fi');
+  if (i == null) return;
+  if (e.target.classList.contains('fname')) settings.items[i].name = e.target.value;
+  if (e.target.classList.contains('famt')) settings.items[i].amt = e.target.value;
+});
+document.getElementById('feeSetBox').addEventListener('change', function(e){
+  var i = e.target.getAttribute && e.target.getAttribute('data-fi');
+  if (i != null && e.target.classList.contains('fsetOn')) settings.items[i].on = e.target.checked;
+});
+/* 收据编号：改完立即生效（无需点保存） */
+document.getElementById('setCounter').onchange = function(){
+  counter = Math.max(1, parseInt(this.value, 10) || 1);
+  this.value = counter;
+  save(LS.counter, counter);
+  renderSel();
+  toast('✅ 下一张收据编号：' + padNo(counter));
+};
+document.getElementById('btnSaveSettings').onclick = function(){  counter = Math.max(1, parseInt(document.getElementById('setCounter').value, 10) || 1);
+  settings.items = settings.items.filter(function(it){ return it.name && it.name.trim(); }).map(function(it){ return { name: it.name.trim(), amt: Number(it.amt) || 0, on: !!it.on }; });
+  save(LS.settings, settings); save(LS.counter, counter);
+  sel = {};   // 重置已选，避免旧项目名残留
+  renderList(); renderSel();
+  document.getElementById('modalSettings').classList.remove('show');
+  toast('✅ 设置已保存');
+};
+
+/* ================= 配置备份 / 恢复 ================= */
+document.getElementById('btnBackup').onclick = function(){
+  var data = {
+    _app: '铭迹幼儿园收据打印配置', _time: new Date().toLocaleString('zh-CN', { hour12: false }),
+    settings: settings, signers: signers, counter: counter,
+    records: records, printed: printed, students: students
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '收据打印配置备份.json';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  toast('✅ 备份文件已下载，妥善保存（可拷去另一台电脑）');
+};
+document.getElementById('btnRestore').onclick = function(){ document.getElementById('fileRestore').click(); };
+document.getElementById('fileRestore').onchange = async function(){
+  var f = this.files[0]; this.value = '';
+  if (!f) return;
+  try {
+    var data = JSON.parse(await f.text());
+    if (!data || data._app !== '铭迹幼儿园收据打印配置') throw new Error('不是本工具的备份文件');
+    if (!confirm('备份时间：' + (data._time || '未知') + '\n将恢复 设置/签名/编号/打印记录/名单，确定吗？')) return;
+    if (data.settings) { settings = Object.assign({}, DEFAULT_SETTINGS, data.settings); save(LS.settings, settings); }
+    if (data.signers)  { signers = data.signers; save(LS.signers, signers); }
+    if (data.counter)  { counter = +data.counter || 1; save(LS.counter, counter); }
+    if (data.records)  { records = data.records; save(LS.records, records); }
+    if (data.printed)  { printed = data.printed; save(LS.printed, printed); }
+    if (data.students && data.students.length) { students = data.students; save(LS.students, students); }
+    sel = {};
+    initSigners(); fillClassSelect(); renderList(); renderSel();
+    document.getElementById('modalSettings').classList.remove('show');
+    toast('✅ 已从备份恢复');
+  } catch(err){
+    alert('恢复失败：' + err.message);
+  }
+};
+
+/* ================= 导入名单 ================= */
+document.getElementById('btnImport').onclick = function(){ document.getElementById('fileImport').click(); };
+document.getElementById('fileImport').onchange = async function(){
+  var f = this.files[0]; this.value = '';
+  if (!f) return;
+  try {
+    var buf = new Uint8Array(await f.arrayBuffer());
+    var rows = await parseXlsx(buf);
+    var hr = -1;
+    for (var i = 0; i < rows.length; i++){
+      if (rows[i].indexOf('学生姓名') >= 0){ hr = i; break; }
+    }
+    if (hr < 0) throw new Error('找不到表头行（需包含"学生姓名"）');
+    // 按表头文字定位列，兼容不同列顺序与列数量
+    var head = rows[hr] || [];
+    function colOf(keys, def){
+      for (var c = 0; c < head.length; c++){
+        var h = String(head[c] || '').trim();
+        for (var k = 0; k < keys.length; k++) if (h.indexOf(keys[k]) >= 0) return c;
+      }
+      return def;
+    }
+    var colName  = colOf(['学生姓名', '姓名'], 0);
+    var colBirth = colOf(['出生日期', '出生'], 4);
+    var colGrade = colOf(['年级'], 5);
+    var colClass = colOf(['班级'], 6);
+    var colSex   = colOf(['性别'], 7);
+    // 兼容两种表结构：表头下两行是「收费项目名+金额」→ 学生从第4行起；普通表 → 表头下一行就是学生
+    var r1 = rows[hr + 1] || [];
+    var feeMode = !(r1[colName] && String(r1[colName]).trim());
+    var feeNames = [], feeAmts = [];
+    if (feeMode){
+      for (var c = 1; c <= 5; c++){
+        var fn = r1[c], fa = (rows[hr + 2] || [])[c];
+        if (fn && typeof fa === 'number'){ feeNames.push(String(fn).trim()); feeAmts.push(fa); }
+      }
+    }
+    var list = [];
+    for (var r = (feeMode ? hr + 3 : hr + 1); r < rows.length; r++){
+      var name = rows[r] && rows[r][colName];
+      if (!name || !String(name).trim()) continue;
+      if (String(name).trim() === '学生姓名') continue;
+      list.push({
+        n: String(name).trim(),
+        b: String(rows[r][colBirth] || ''),
+        g: String(rows[r][colGrade] || ''),
+        c: String(rows[r][colClass] || ''),
+        s: String(rows[r][colSex] || '')
+      });
+    }
+    if (!list.length) throw new Error('没有读到学生数据');
+    var msg = '读到 ' + list.length + ' 名学生';
+    if (feeNames.length) msg += '，收费项目：' + feeNames.map(function(n, i){ return n + ' ' + feeAmts[i]; }).join(' / ');
+    if (!confirm(msg + '。\n确定替换当前名单吗？')) return;
+    students = list; save(LS.students, students);
+    if (feeNames.length){
+      settings.items = feeNames.map(function(n, i){ return { name: n, amt: feeAmts[i], on: true }; });
+      save(LS.settings, settings);
+    }
+    sel = {};
+    fillClassSelect(); renderList(); renderSel();
+    toast('✅ 名单已更新：' + list.length + ' 名学生');
+  } catch(err){
+    alert('导入失败：' + err.message);
+  }
+};
+
+/* ================= 启动 ================= */
+if (!storageTest() || location.protocol === 'http:' || location.protocol === 'https:'){
+  showStoreWarn();
+}
+document.getElementById('payDate').value = batchDate;
+fillClassSelect(); renderList(); renderSel(); initSigners();
+</script>
+</body>
+</html>

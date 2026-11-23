@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>博雅幼儿园收据打印系统 · 使用说明书</title>
+<style>
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:#f5f6f8; color:#2b2f36; font-size:15px; line-height:1.8;}
+  .wrap{max-width:860px; margin:0 auto; padding:24px 16px 60px;}
+  header.cover{background:linear-gradient(135deg,#d9534f,#e8795a); color:#fff; border-radius:16px; padding:36px 32px; margin-bottom:24px;}
+  header.cover h1{font-size:26px; margin-bottom:8px;}
+  header.cover p{opacity:.92; font-size:14px;}
+  h2{font-size:19px; margin:32px 0 12px; padding-left:12px; border-left:4px solid #d9534f;}
+  h3{font-size:16px; margin:18px 0 8px; color:#c9433f;}
+  .card{background:#fff; border-radius:12px; padding:18px 22px; box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:14px;}
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; margin:10px 0;}
+  th,td{border-bottom:1px solid #eef0f3; padding:9px 12px; text-align:left; font-size:14px; vertical-align:top;}
+  th{background:#faf3f2; color:#a8433f; font-weight:bold;}
+  .step{display:flex; gap:14px; margin:10px 0;}
+  .step .n{flex-shrink:0; width:30px; height:30px; border-radius:50%; background:#d9534f; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:15px;}
+  .step .t{flex:1; padding-top:2px;}
+  .tip{background:#fff7e0; border:1px solid #f0d060; color:#7a5d00; border-radius:10px; padding:12px 16px; margin:12px 0; font-size:14px;}
+  .warn{background:#fdecea; border:1px solid #f3b8b4; color:#9c2f2a; border-radius:10px; padding:12px 16px; margin:12px 0; font-size:14px;}
+  .ok{background:#eaf7ef; border:1px solid #b5e0c5; color:#22683c; border-radius:10px; padding:12px 16px; margin:12px 0; font-size:14px;}
+  code{background:#f1f3f5; border-radius:4px; padding:1px 6px; font-size:13px; color:#c9433f;}
+  ul,ol{padding-left:22px;}
+  li{margin:4px 0;}
+  footer{margin-top:40px; text-align:center; color:#9aa2ad; font-size:13px;}
+  .kbd{border:1px solid #ccc; border-bottom-width:2px; border-radius:4px; padding:0 6px; font-size:13px; background:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <h1>🎒 博雅幼儿园收据打印系统 · 使用说明书</h1>
+  <p>版本 v1.2.7 · 离线单文件工具 · 无需安装、无需联网、数据保存在本机</p>
+</header>
+
+<h2>一、这个工具是做什么的？</h2>
+<div class="card">
+  替代手写收据：从学生名单里勾选学生，自动生成标准收据并打印。<b>A4 纸竖放，一页 3 张收据</b>（175mm × 94mm），收据编号自动递增、大写金额自动转换、打印记录自动存档。整个工具就是电脑上的一个网页文件（<code>收据打印工具.html</code>），<b>不用装任何软件，不用联网</b>。
+</div>
+
+<h2>二、最重要的一步：怎么打开</h2>
+<div class="warn">
+  ⚠️ <b>请务必双击打开文件使用，不要在聊天工具的预览窗口里长期使用！</b><br>
+  预览窗口的数据是临时的，一关闭输入的内容（会计/出纳/经手人等）就会丢失。
+</div>
+<div class="ok">
+  ✅ 正确做法：把 <code>收据打印工具.html</code> 复制到电脑桌面（或任意文件夹），<b>双击</b>用浏览器（Edge 或 Chrome）打开。这样所有输入的内容都会永久保存在这台电脑上。
+</div>
+<div class="tip">
+  💡 建议在桌面右键 → 新建快捷方式指向这个文件，以后每天双击快捷方式即可。
+</div>
+
+<h2>三、日常开票流程（4 步）</h2>
+<div class="card">
+  <div class="step"><div class="n">1</div><div class="t"><b>找学生</b> —— 左侧名单支持按姓名搜索、按班级筛选；点「全选当前列表」可批量选中整个班。</div></div>
+  <div class="step"><div class="n">2</div><div class="t"><b>核对金额</b> —— 右侧会列出每位学生的收费明细，默认按全园统一标准（保教费 2200 / 膳食点心费 1250 / 生活用品费 150）。哪项没收就去掉勾，金额不同直接改数字，合计自动算。</div></div>
+  <div class="step"><div class="n">3</div><div class="t"><b>填签名</b> —— 顶栏填「会计 / 出纳 / 经手人」姓名（填一次就一直记住）；不填收据上就留空位，打印后手写。</div></div>
+  <div class="step"><div class="n">4</div><div class="t"><b>打印</b> —— 核对右下角「共 N 张 · 合计 · 起始编号」，点 <b>🖨️ 打印收据</b>，浏览器弹出打印窗口后直接确认即可。</div></div>
+</div>
+
+<h2>四、打印设置（只需设置一次）</h2>
+<div class="card">
+  <table>
+    <tr><th>项目</th><th>怎么设</th></tr>
+    <tr><td>纸张方向</td><td><b>纵向</b>（A4 竖放）</td></tr>
+    <tr><td>纸张大小</td><td>A4</td></tr>
+    <tr><td>缩放</td><td>默认 100%（如页边被裁切可试 90%~95%）</td></tr>
+    <tr><td>边距</td><td>默认即可</td></tr>
+  </table>
+  <div class="tip">💡 浏览器会记住上次的打印设置，设置过一次以后基本不用再动。</div>
+</div>
+
+<h2>五、收据长什么样</h2>
+<div class="card">
+  <table>
+    <tr><th>区域</th><th>内容</th></tr>
+    <tr><td>左上</td><td>收款日期</td></tr>
+    <tr><td>中间</td><td>「博雅幼儿园收据」大字标题</td></tr>
+    <tr><td>右上</td><td>红色编号 No.0000001（自动递增）</td></tr>
+    <tr><td>第一行</td><td>今收到：××小朋友</td></tr>
+    <tr><td>明细</td><td>各收费项目及金额；合计一行显示：大写在先（如 叁仟陆佰元整），小写在后（￥3,600.00）</td></tr>
+    <tr><td>底部</td><td>会计、出纳、经手人（顶栏填了就打印，没填留空手写）</td></tr>
+  </table>
+  📄 打印后沿收据之间的空隙裁开即可，一张 A4 出 3 张收据。
+</div>
+
+<h2>六、打印记录（存根台账）</h2>
+<div class="card">
+  <ul>
+    <li>每次点打印，系统自动记一笔：<b>编号、姓名、金额、收款日期、打印时间</b>。</li>
+    <li>点顶栏「📜 打印记录」可随时查看，找不到底单时点「补打」原样再打一张（<b>不占新编号</b>）。</li>
+    <li>收据打错了？作废的纸留下，在「⚙️ 设置 → 当前收据编号」把编号改回去即可。</li>
+  </ul>
+</div>
+
+<h2>七、设置说明</h2>
+<div class="card">
+  <table>
+    <tr><th>设置项</th><th>说明</th></tr>
+    <tr><td>当前收据编号</td><td>下一张收据用的号码。新学期起始号在这里改。</td></tr>
+    <tr><td>收费项目</td><td>收据上的明细行，可修改名称/金额、启用停用、增删项目。改完点「保存设置」。</td></tr>
+    <tr><td>📥 导入名单</td><td>学生有变动时，点「导入名单」选择新的 Excel。<b>最低要求</b>：表里有一列「学生姓名」表头即可导入（表头下隔两行起写名字，空行自动跳过）。<b>建议保留</b>姓名 + 班级两列，方便按班级筛选。若表里有收费项目和标准金额（表头下两行），导入后会自动更新收费项目。没有「学生姓名」表头时导入会失败提示，不会覆盖现有名单。</td></tr>
+    <tr><td>💾 导出备份</td><td>把全部数据（签名、编号、记录、名单）打包成一个 JSON 文件下载保存。</td></tr>
+    <tr><td>📂 从备份恢复</td><td>选择备份文件一键恢复。换电脑 / 怕丢数据时用。</td></tr>
+  </table>
+</div>
+
+<h2>八、常见问题</h2>
+<div class="card">
+  <h3>Q1：输入的签名又不见了？</h3>
+  <p>说明你是在预览窗口里用的。页面顶部出现黄色提醒时就是这种情况。请<b>双击打开本地文件</b>使用，数据就不会丢。</p>
+  <h3>Q2：换电脑 / 重装系统后数据怎么办？</h3>
+  <p>数据存在浏览器里，换电脑前在旧电脑「导出备份文件」，拷到新电脑后「从备份恢复」即可，收据编号和记录都无缝衔接。</p>
+  <h3>Q3：打印出来的字压到边框 / 内容被裁掉？</h3>
+  <p>打印窗口里把「缩放」调到 90%~95% 再试；确认纸张方向是「纵向」。</p>
+  <h3>Q4：某位学生只交了一项费用？</h3>
+  <p>在右侧该学生的卡片里，去掉其他项目的勾，只保留实际收取的项目。</p>
+  <h3>Q5：编号打错了、中间跳号了？</h3>
+  <p>「⚙️ 设置 → 当前收据编号」直接改成正确号码，下一张就从这个号开始。</p>
+  <h3>Q6：名单里没有这个新生？</h3>
+  <p>把新学生加进 Excel 名单表（A 列加名字即可，无需严格对齐原表格式），再「导入名单」即可。</p>
+</div>
+
+<h2>九、注意事项</h2>
+<div class="warn">
+  <ul>
+    <li>数据保存在<b>当前电脑的浏览器</b>里：清理浏览器缓存 / 重装浏览器前，先「导出备份文件」！</li>
+    <li>公司和家里两台电脑数据<b>不自动同步</b>，用备份文件搬运。</li>
+    <li>打印记录建议每月导出一份备份留存。</li>
+  </ul>
+</div>
+
+<footer>博雅幼儿园收据打印系统 v1.2.7 · 本说明书可打印留存 · 2026年10月</footer>
+</div>
+</body>
+</html>

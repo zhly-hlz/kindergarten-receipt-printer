@@ -1,0 +1,15 @@
+# 工作区数据，不要提交
+.workbuddy/
+
+# 含真实学生信息的原始表格/图片一律不上传
+*.xlsx
+*.xls
+*.jpg
+*.jpeg
+*.png
+
+# 本机备份、临时文件
+*备份*.json
+*.bak
+Thumbs.db
+.DS_Store
